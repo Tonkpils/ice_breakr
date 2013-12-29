@@ -1,0 +1,9 @@
+%ul.chat_list
+  - @users.each do |user|
+    %li= link_to user.username, private_chat_path(user_id: user.id)
+
+= # Main Chat Box
+
+= text_field_tag :message
+= submit_tag :send
+

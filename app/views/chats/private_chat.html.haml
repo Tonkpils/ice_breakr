@@ -1,0 +1,6 @@
+%h1
+  = "Hi #{current_user.username}"
+  %br
+  %small= "You are now chatting with #{@user.username}"
+
+= javascript_include_tag "main_chat"
