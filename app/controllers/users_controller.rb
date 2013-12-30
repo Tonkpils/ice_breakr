@@ -24,11 +24,10 @@ class UsersController < ApplicationController
   def login
     if request.method == 'POST'
       @user = User.find_by username: params[:username]
-      puts @user.inspect
       if @user
         update_session_user
       else
-        @errors = ['Unable to find account for #{params[:username]}']
+        @errors = ['Unable to find account for ' << params[:username]]
       end
     end
 
