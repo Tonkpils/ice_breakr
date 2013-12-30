@@ -1,7 +1,6 @@
 $ ->
   socket = new WebSocket "ws://#{window.location.host}/notifications/chat"
 
-  console.log socket
-
   socket.onmessage = (event) ->
+    console.log(event, arguments)
     alert(event.data)

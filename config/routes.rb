@@ -1,7 +1,11 @@
 IceBreakr::Application.routes.draw do
 
-  root to: 'users#new'
+  # root to: 'users#new'
+  root to: 'users#login'
   resources :users
+
+  post '/' => 'users#login', as: :login
+  get 'logout' => 'users#logout', as: :logout
 
   get 'chat' => 'chats#index', as: :chat
   get 'private/chat' => 'chats#private_chat', as: :private_chat

@@ -5,7 +5,7 @@ class NotificationsController < ApplicationController
     hijack do |tubesock|
       redis_thread = Thread.new do
         # TODO - Create a session id unique to each user in a chat zone in order to message them directly
-        Redis.new.subscribe session[:chatroom_id] do |on|
+        Redis.new.subscribe session[:chat_zone_id] do |on|
           on.message do |channel, message|
              tubesock.send_data message
           end
@@ -13,10 +13,10 @@ class NotificationsController < ApplicationController
       end
 
       tubesock.onopen do
-        Redis.new.publish session[:chatroom_id], "You are now chatting with someone..."
+        Redis.new.publish session[:chat_zone_id], "You are now chatting with someone..."
       end
       tubesock.onmessage do |m|
-        Redis.new.publish session[:chatroom_id], m
+        Redis.new.publish session[:chat_zone_id], m
       end
 
       tubesock.onclose do
