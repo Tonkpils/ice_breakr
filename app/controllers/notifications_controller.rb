@@ -24,8 +24,9 @@ class NotificationsController < ApplicationController
       tubesock.onopen do
 
       end
-      tubesock.onmessage do |m|
-        Redis.new.publish session[:chat_zone_id], m
+      tubesock.onmessage do |data|
+        route_message data
+        # Redis.new.publish session[:chat_zone_id], m
       end
 
       tubesock.onclose do
@@ -38,6 +39,19 @@ class NotificationsController < ApplicationController
     end
   end
   private
+    def route_message(m)
+      data = JSON.parse m
+      # Handle each event type
+      if data['event'] == 'send_message'
+        data = data.merge get_user
+        message = data.to_json
+        # Send message to each recipient
+        data['recipients'].each { |user_id|
+          Redis.new.publish(user_id, message)
+        }
+      end
+    end
+
     def message_event_block(tubesock, on)
       on.message do |channel, message|
         send_data(tubesock, channel, message)

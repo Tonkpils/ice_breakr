@@ -1,6 +1,16 @@
 %h1
   = "Hi #{current_user.username}"
   %br
-  %small= "You are now chatting with #{@user.username}"
+  %small{:class => "recipient", :data => {:user_id => "#{@user.id}"}}
+    "You are now chatting with #{@user.username}"
+  %br
+  %textarea{:class => "convo-area", :disabled => ""}
+
+  %br
+  %textarea{:class => "msg-area"}
+  
+  %br
+  %button{:type => "submit"}
+    Send Message
 
 = javascript_include_tag "main_chat"
