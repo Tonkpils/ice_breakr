@@ -3,36 +3,41 @@ class NotificationsController < ApplicationController
 
   def chat
     hijack do |tubesock|
-      redis_thread = Thread.new do
 
+      @redis = Redis.new(host: REDIS_URI.host, port: REDIS_URI.port, password: REDIS_URI.password)
+
+      redis_thread = Thread.new do
         message = build_event "zoneuser_add"
         message = message.to_json
-        Redis.new.publish session[:chat_zone_id], message
-
-        # Subscribe each new connection to their chat zone.
-        Redis.new.subscribe session[:chat_zone_id] do |on|
+        @redis.publish session[:chat_zone_id], message
+        
+        redis_sub = Redis.new(host: REDIS_URI.host, port: REDIS_URI.port, password: REDIS_URI.password)
+        
+        # TODO - Create a session id unique to each user in a chat zone in order to message them directly
+        redis_sub.subscribe session[:chat_zone_id] do |on|
           message_event_block(tubesock, on)
         end
 
         # Subscribe each user to their own notification connection
-        Redis.new.subscribe session[:user_id] do |on|
+        redis_sub.subscribe session[:user_id] do |on|
           message_event_block(tubesock, on)
         end
 
       end
 
       tubesock.onopen do
-
       end
+
       tubesock.onmessage do |data|
         route_message data
-        # Redis.new.publish session[:chat_zone_id], m
       end
 
       tubesock.onclose do
         message = build_event "zoneuser_remove"
         message = message.to_json
-        Redis.new.publish(session[:chat_zone_id], message)
+        
+        @redis.publish(session[:chat_zone_id], message)
+
         redis_thread.kill
       end
 
@@ -47,7 +52,7 @@ class NotificationsController < ApplicationController
         message = data.to_json
         # Send message to each recipient
         data['recipients'].each { |user_id|
-          Redis.new.publish(user_id, message)
+          @redis.publish(user_id, message)
         }
       end
     end
